@@ -1,0 +1,35 @@
+{
+	"name": "directus-extension-action-button",
+	"description": "Action button interface that allows sending any HTTP request for Directus 9",
+	"version": "1.0.0",
+	"author": "Oleksand Kozlov <cah4o3@gmail.com>",
+	"keywords": [
+		"directus",
+		"directus-extension",
+		"directus-custom-interface",
+		"button",
+		"http",
+		"request"
+	],
+	"files": [
+		"dist/index.js",
+		"package.json",
+		"README.md"
+	],
+	"directus:extension": {
+		"type": "interface",
+		"path": "dist/index.js",
+		"source": "src/index.js",
+		"host": "^9.18.1"
+	},
+	"license": "ISC",
+	"scripts": {
+		"build": "directus-extension build",
+		"dev": "directus-extension build -w --no-minify",
+		"prepublish": "npm run build"
+	},
+	"devDependencies": {
+		"@directus/extensions-sdk": "9.18.1",
+		"vue": "^3.2.39"
+	}
+}
