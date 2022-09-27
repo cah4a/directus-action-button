@@ -1,7 +1,7 @@
 {
 	"name": "directus-extension-action-button",
 	"description": "Action button interface that allows sending any HTTP request for Directus 9",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"author": "Oleksand Kozlov <cah4o3@gmail.com>",
 	"keywords": [
 		"directus",
@@ -21,6 +21,13 @@
 		"path": "dist/index.js",
 		"source": "src/index.js",
 		"host": "^9.18.1"
+	},
+	"bugs": {
+		"url": "https://github.com/cah4a/directus-action-button/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/cah4a/directus-action-button.git"
 	},
 	"license": "ISC",
 	"scripts": {
