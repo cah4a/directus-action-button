@@ -103,13 +103,6 @@ export default defineComponent({
               )
             : false;
 
-          console.log({
-            method,
-            url,
-            data,
-            headers,
-          });
-
           const result = await api.request({
             method,
             url,
@@ -119,13 +112,17 @@ export default defineComponent({
 
           if (props.result === "list") {
             router.push(`/content/${props.collection}`);
+          } else if (props.result === "reload") {
+            router.go(0);
           } else {
             store.add({
-              title: result.title || "Success",
-              text: result.text || "Action was completed successfully",
+              title: result.data.title || "Success",
+              text: result.data.text || "Action was completed successfully",
               type: "success",
               dialog: true,
             });
+
+            if (result.data.goto) router.push(result.data.goto);
           }
         } catch (error) {
           console.warn(error);
