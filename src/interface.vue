@@ -1,26 +1,27 @@
 <template>
     <div>
-        <v-button :loading="isLoading"
-                  @click="click"
-                  :class="buttonType"
-                  :secondary="buttonType !== 'primary'"
-                  :icon="!label"
+        <v-button
+            :loading="isLoading"
+            @click="click"
+            :class="buttonType"
+            :secondary="buttonType !== 'primary'"
+            :icon="!label"
         >
-            <v-icon v-if="icon" left :name="icon"/>
+            <v-icon v-if="icon" left :name="icon" />
             {{ label }}
         </v-button>
     </div>
 </template>
 
 <script>
-import {defineComponent, ref, inject, computed} from 'vue';
-import {useRouter} from 'vue-router'
-import {useApi, useStores} from '@directus/extensions-sdk'
-import {render} from 'micromustache';
-import {useI18n} from 'vue-i18n';
+import { defineComponent, ref, inject, computed } from "vue";
+import { useRouter } from "vue-router";
+import { useApi, useStores } from "@directus/extensions-sdk";
+import { render } from "micromustache";
+import { useI18n } from "vue-i18n";
 
 export default defineComponent({
-    emits: ['input'],
+    emits: ["input"],
     props: {
         label: {
             type: String,
@@ -44,7 +45,7 @@ export default defineComponent({
         },
         method: {
             type: String,
-            default: 'patch',
+            default: "patch",
         },
         body: {
             type: Object,
@@ -67,16 +68,16 @@ export default defineComponent({
         primaryKey: {
             type: [String, Number],
             required: true,
-        }
+        },
     },
     setup(props) {
-        const {useNotificationsStore} = useStores();
+        const { useNotificationsStore } = useStores();
         const store = useNotificationsStore();
-        const router = useRouter()
-        const api = useApi()
-        const isLoading = ref(false)
-        const values = inject('values')
-        const {t} = useI18n();
+        const router = useRouter();
+        const api = useApi();
+        const isLoading = ref(false);
+        const values = inject("values");
+        const { t } = useI18n();
 
         return {
             isLoading,
@@ -87,73 +88,81 @@ export default defineComponent({
                 try {
                     const item = values.value;
                     console.log(item);
-                    const url = render(props.url, item) || `/items/${props.collection}/${props.primaryKey}`;
-                    const data = maybeJson(render(props.body, item));
-                    const method = props.method || 'patch';
+                    const url =
+                        render(props.url, item) ||
+                        `/items/${props.collection}/${props.primaryKey}`;
+                    const data = props.body
+                        ? maybeJson(render(props.body, item))
+                        : false;
+                    const method = props.method || "patch";
 
-                    const headers = Object.fromEntries(
-                        props.headers.map(({key, value}) => [
-                            key,
-                            render(value, item)
-                        ])
-                    );
-
-                    console.log({
-                        method,
-                        url,
-                        data,
-                        headers
-                    });
+                    const headers = props.headers
+                        ? Object.fromEntries(
+                              props.headers.map(({ key, value }) => [
+                                  key,
+                                  render(value, item),
+                              ])
+                          )
+                        : false;
 
                     const result = await api.request({
                         method,
                         url,
                         data,
-                        headers
+                        headers,
                     });
 
-                    if (props.result === 'list') {
+                    if (props.result === "list") {
                         router.push(`/content/${props.collection}`);
+                    } else if (props.result === "reload") {
+                        router.go(0);
                     } else {
                         store.add({
-                            title: result.title || "Success",
-                            text: result.text || "Action was completed successfully",
-                            type: 'success',
+                            title: result.data.title || "Success",
+                            text:
+                                result.data.text ||
+                                "Action was completed successfully",
+                            type: "success",
                             dialog: true,
                         });
+
+                        if (result.data.goto) router.push(result.data.goto);
                     }
                 } catch (error) {
-                    console.warn(error)
+                    console.warn(error);
 
                     const code =
                         error.response?.data?.errors?.[0]?.extensions?.code ||
                         error.extensions?.code ||
-                        'UNKNOWN';
+                        "UNKNOWN";
 
-                    const message = error.response?.data?.errors?.[0]?.message || error.message || undefined;
+                    const message =
+                        error.response?.data?.errors?.[0]?.message ||
+                        error.message ||
+                        undefined;
 
                     store.add({
                         title: t(`errors.${code}`),
                         text: message,
-                        type: 'error',
+                        type: "error",
                         dialog: true,
                         error,
                     });
                 } finally {
                     isLoading.value = false;
                 }
-            }
-        }
+            },
+        };
 
         function maybeJson(str) {
             try {
-                return JSON.parse(str)
+                return JSON.parse(str);
             } catch (e) {
                 return str;
             }
         }
-    }
-})
+    },
+});
 </script>
 
 <style scoped>
